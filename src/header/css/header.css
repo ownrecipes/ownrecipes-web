@@ -103,8 +103,10 @@
 }
 #header-navbar .header-dropdown > .dropdown-toggle,
 #header-navbar #settings-dropdown {
+  height: 100%;
   padding-top: 0;
   padding-bottom: 0;
+  align-content: center;
 }
 @media screen and (max-width: 767px) {
   #header-navbar .my-account-nav > .nav-link {
