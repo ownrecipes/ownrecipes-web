@@ -140,12 +140,6 @@ function parseAsNumber(val: string | undefined): number | undefined {
   return val ? parseInt(val) : undefined;
 }
 
-function handleValidate(values: IMenuItemModalFormDataProps): ValidationErrors {
-  const errors: ValidationErrors = {};
-  errors.recipe = requiredValidator(values.recipe || values.ext_title);
-  return errors;
-}
-
 const MenuItemModalForm = forwardRef<HTMLFormElement, IMenuItemModalFormProps>(({
   item, recipe, recipeReadonly, fetchRecipes, onSubmit, onSubmitSuccess, submitRef }: IMenuItemModalFormProps, ref) => {
     const intl = useIntl();
@@ -159,11 +153,19 @@ const MenuItemModalForm = forwardRef<HTMLFormElement, IMenuItemModalFormProps>((
       start_date: moment(item?.start_date || new Date()).unix(),
     });
 
+    const handleSubmit = useCallback((values: IMenuItemModalFormDataProps) => {
+      const errors: ValidationErrors = {};
+      errors.recipe = requiredValidator(values.recipe || values.ext_title);
+      if (errors.recipe != null) {
+        return errors;
+      }
+      return onSubmit(values);
+    }, [onSubmit]);
+
     return (
       <ReForm
           initialValues = {initialValues}
-          onSubmit = {onSubmit}
-          validate = {handleValidate}
+          onSubmit = {handleSubmit}
           subscription = {{}}
           render = {({ form, handleSubmit: renderSubmit }) => (
             <Form onSubmit={renderSubmit} ref={ref}>
@@ -211,6 +213,7 @@ const MenuItemModalForm = forwardRef<HTMLFormElement, IMenuItemModalFormProps>((
                       label      = {formatMessage(messages.start_date)}
                       name       = 'start_date'
                       timeFormat = {false}
+                      inputReadOnly
                       required />
                 </Col>
               </Row>

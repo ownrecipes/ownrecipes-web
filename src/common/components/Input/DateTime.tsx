@@ -14,6 +14,7 @@ export interface IDateTimeProps extends IBaseInputComponentProps {
   value?: string | Date | Moment | null;
   timeFormat?: string | boolean;
   dateFormat?: string | boolean;
+  inputReadOnly?: boolean;
 
   onChange?: (name: string, value: moment.MomentInput) => void;
 }
@@ -29,8 +30,8 @@ export default class DateTime extends BaseInputComponent<IDateTimeProps, IDateTi
 
   render() {
     const { onChange, // eslint-disable-line @typescript-eslint/no-unused-vars
-        value, timeFormat, dateFormat,
-        name, style, tooltip,
+        value, timeFormat, dateFormat, inputReadOnly,
+        name, style, tooltip, readOnly,
         label, className, helpText, errors, meta, ...rest } = this.props; // eslint-disable-line @typescript-eslint/no-unused-vars
 
     return (
@@ -50,6 +51,7 @@ export default class DateTime extends BaseInputComponent<IDateTimeProps, IDateTi
               inputProps = {{
                 name:       name,
                 className: 'form-control',
+                readOnly: inputReadOnly || readOnly,
                 ...rest,
               }}
               dateFormat = {dateFormat || 'ddd, ll'}
