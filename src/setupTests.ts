@@ -3,3 +3,8 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
+
+// Fixup superagent 10.2.3
+import { TextEncoder, TextDecoder } from 'util';
+
+Object.assign(global, { TextDecoder, TextEncoder });

@@ -1,4 +1,4 @@
-import jwtDecode, { JwtPayload } from 'jwt-decode';
+import { jwtDecode, JwtPayload } from 'jwt-decode';
 import moment from 'moment';
 
 import request, { refreshToken } from '../../common/CustomSuperagent';

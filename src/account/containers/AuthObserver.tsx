@@ -4,7 +4,7 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { NavigateFunction, useLocation, useNavigate } from 'react-router';
 import { Location } from 'history';
-import jwtDecode, { JwtPayload } from 'jwt-decode';
+import { jwtDecode, JwtPayload } from 'jwt-decode';
 import moment from 'moment';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore

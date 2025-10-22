@@ -1,4 +1,4 @@
-import jwtDecode, { JwtPayload } from 'jwt-decode';
+import { jwtDecode, JwtPayload } from 'jwt-decode';
 import { Dispatch as ReduxDispatch } from 'redux';
 
 import ItemReducerType from '../../common/store/ItemReducerType';
