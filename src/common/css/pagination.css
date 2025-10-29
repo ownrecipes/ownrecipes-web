@@ -17,7 +17,7 @@
   padding-bottom: 0;
 }
 
-.page-link.active:hover {
+.page-link.active {
   cursor: default;
   pointer-events: none;
 }
@@ -33,6 +33,11 @@
   color:            var(--primaryContrast);
   background-color: var(--primaryMain);
   border-color:     var(--primaryMain);
+}
+.page-item.active:hover .page-link {
+  color:            var(--primaryContrast);
+  background-color: var(--primaryLight);
+  border-color:     var(--primaryLight);
 }
 
 .page-item.disabled .page-link {

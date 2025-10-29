@@ -87,7 +87,7 @@
   justify-content: center;
   margin-top: 1rem;
 }
-.container.browser .pagination .page-item .page-link:hover {
+.container.browser .pagination .page-item .page-link:not(.active):hover {
   background-color: var(--hoverBg);
   border-color: var(--secondaryText);
 }
