@@ -129,7 +129,7 @@
   }
 }
 
-@media screen and (min-width: 50rem) {
+@media screen and (min-width: 55rem) {
   .container.browser .pagination .page-item.skipper-near,
   .container.browser .pagination .page-item.skipper-far {
     display: list-item;

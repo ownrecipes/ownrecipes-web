@@ -68,13 +68,6 @@ function generatePageList(page: number, pages: number): Array<PaginationPageNumb
 
   const numOfLinks = 8;
 
-  if (pages <= numOfLinks) {
-    for (let i = 1; i <= pages; i++) {
-      pageList.push({ index: i, role: 'page' });
-    }
-    return pageList;
-  }
-
   /**
    * Rules: As SPA, we want a consistent number of links, to avoid jumping.
    * - Always the first and last page.
@@ -100,7 +93,7 @@ function generatePageList(page: number, pages: number): Array<PaginationPageNumb
     const skipperStep = Math.ceil((page - previousPage) / 3);
     if (page - skipperStep !== previousPage) {
       previousPage = page - skipperStep;
-      pageList.push({ index: previousPage, role: 'skipper-near' });
+      pageList.push({ index: previousPage, role: page === pages && pages < numOfLinks ? 'last' : 'skipper-near' });
     }
   }
 
