@@ -8,6 +8,7 @@ import '../css/header.css';
 
 import { LanguageCode } from '../../common/language';
 import DynamicHeightContext from '../../common/context/DynamicHeightContext';
+import useIsScreenMdUp from '../../common/hooks/useIsScreenMdUp';
 import useWindowSize from '../../common/hooks/useWindowSize';
 import Icon from '../../common/components/Icon';
 import CreateRecipeMenuItem from './CreateRecipeMenuItem';
@@ -71,13 +72,7 @@ const NavBar: React.FC<INavBarProps> = ({
     dynamicHeightContext.setToolbarHeight(0);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [isScreenMdUp, setIsScreenMdUp] = useState<boolean>(false);
-  useEffect(() => {
-    /* OPT This would make a good hoc. */
-    const handler = (e: MediaQueryListEvent) => setIsScreenMdUp(e.matches);
-    window.matchMedia('(min-width: 768px)').addEventListener('change', handler);
-    setIsScreenMdUp(window.matchMedia('(min-width: 768px)').matches);
-  }, []);
+  const isScreenMdUp = useIsScreenMdUp();
   const [isSearchExpanded, setIsSearchExpanded] = useState<boolean>(false);
   const handleExpandSearch = useCallback((expanded: boolean) => { setIsSearchExpanded(expanded); }, []);
 

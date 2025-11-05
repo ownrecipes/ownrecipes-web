@@ -6,7 +6,7 @@ import { useLayoutEffect, useState } from 'react';
  * See: https://stackoverflow.com/a/19014495
  */
 
-export default function useWindowSize() {
+export default function useWindowSize(): number[] {
   const [size, setSize] = useState([0, 0]);
 
   useLayoutEffect(() => {
