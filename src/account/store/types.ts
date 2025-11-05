@@ -1,5 +1,6 @@
 import { jwtDecode, JwtPayload } from 'jwt-decode';
 import { Dispatch as ReduxDispatch } from 'redux';
+import moment from 'moment';
 
 import ItemReducerType from '../../common/store/ItemReducerType';
 import { BasicAction, PayloadAction } from '../../common/store/redux';
@@ -17,6 +18,7 @@ export interface UserAccount {
   email:    string;
   role:     UserRole;
   remember: boolean;
+  loginIat: number;
   token:    string;
   refresh?: string;
 }
@@ -38,7 +40,7 @@ function getRole(decodedToken: OwnrecipesPayload): UserRole {
   else return UserRole.USER;
 }
 
-export const toUserAccount = (loginDto: LoginDto, remember: boolean): UserAccount => {
+export const toUserAccount = (loginDto: LoginDto, remember: boolean, loginIat: number | undefined): UserAccount => {
   const { access, refresh } = loginDto;
   if (access == null) throw new Error('Invalid response: access token may not be null');
   const decodedToken: OwnrecipesPayload | undefined = jwtDecode<OwnrecipesPayload>(access);
@@ -49,11 +51,12 @@ export const toUserAccount = (loginDto: LoginDto, remember: boolean): UserAccoun
   return {
     id:       decodedToken.user_id,
     token:    access,
-    refresh:  remember ? refresh : undefined,
+    refresh:  refresh,
     username: decodedToken.username,
     email:    decodedToken.email,
     role:     getRole(decodedToken),
     remember: remember,
+    loginIat: loginIat || decodedToken.iat || moment().unix(),
   };
 };
 

@@ -4,11 +4,10 @@ import superRequest from 'superagent';
 import { ACTION } from './store/ReduxHelper';
 import * as InternalErrorActions from '../internal_error/store/actions';
 import { invalidateToken } from '../account/store/actions';
-import { ACCOUNT_TOKEN_STORAGE_KEY, UserAccount } from '../account/store/types';
 import { createInternalHiddenValidationResult, toValidationErrors, ValidationError } from './store/Validation';
 import { AnyDispatch, toBasicAction } from './store/redux';
-import LocalStorageHelper from './LocalStorageHelper';
 import { isDemoMode } from './utility';
+import { getToken } from './CustomSuperagent';
 
 export type ResponseError = superRequest.ResponseError;
 export const isResponseError = (obj: unknown): obj is ResponseError => (
@@ -46,9 +45,7 @@ const handleErrorUnauthorized = async (dispatch: AnyDispatch, error: ResponseErr
     return null;
   }
 
-  const storageItem = LocalStorageHelper.getItem(ACCOUNT_TOKEN_STORAGE_KEY);
-  const user: UserAccount | undefined = storageItem ? JSON.parse(storageItem) : undefined;
-
+  const user = getToken();
   if (user) {
     dispatch(invalidateToken());
   }

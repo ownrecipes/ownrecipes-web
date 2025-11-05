@@ -1,8 +1,7 @@
-import { clearToken } from '../../common/CustomSuperagent';
-import LocalStorageHelper from '../../common/LocalStorageHelper';
+import { setToken, clearToken } from '../../common/CustomSuperagent';
 import { PendingState } from '../../common/store/GenericReducerType';
 import ReduxHelper from '../../common/store/ReduxHelper';
-import { AccountAction, AccountActionTypes, AccountState, ACCOUNT_STORE, ACCOUNT_TOKEN_STORAGE_KEY } from './types';
+import { AccountAction, AccountActionTypes, AccountState, ACCOUNT_STORE } from './types';
 
 const defaultState: AccountState = ReduxHelper.getItemReducerDefaultState(ACCOUNT_STORE);
 
@@ -12,7 +11,7 @@ const reducer = (state = defaultState, action: AccountAction): AccountState => {
       case AccountActionTypes.LOGIN:
         {
           const user = action.payload;
-          LocalStorageHelper.setItem(ACCOUNT_TOKEN_STORAGE_KEY, JSON.stringify(user));
+          setToken(user);
           const newState = ReduxHelper.setItem(state, user);
           newState.valid = true;
           return newState;

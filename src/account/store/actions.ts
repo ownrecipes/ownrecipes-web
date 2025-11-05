@@ -1,18 +1,31 @@
 import { jwtDecode, JwtPayload } from 'jwt-decode';
 import moment from 'moment';
 
-import request, { refreshToken } from '../../common/CustomSuperagent';
+import request, { getToken as getTokenFromStorage, refreshToken } from '../../common/CustomSuperagent';
 import { serverURLs } from '../../common/config';
 import { ACTION } from '../../common/store/ReduxHelper';
-import LocalStorageHelper from '../../common/LocalStorageHelper';
 import { AnyDispatch, toBasicAction } from '../../common/store/redux';
 import { handleFormError } from '../../common/requestUtils';
-import { AccountActionTypes, ACCOUNT_STORE, AccountDispatch, ACCOUNT_TOKEN_STORAGE_KEY, UserAccount, LoginDto, toUserAccount, AccountAction } from './types';
+import { AccountActionTypes, ACCOUNT_STORE, AccountDispatch, UserAccount, LoginDto, toUserAccount, AccountAction } from './types';
 
-export function shouldForceReLogin(refresh: string): boolean {
-  const decodedToken: JwtPayload = jwtDecode<JwtPayload>(refresh);
-  return decodedToken.exp == null
-      || (moment(new Date()).add(1, 'day') > moment.unix(decodedToken.exp));
+export function shouldForceReLogin(user: UserAccount): boolean {
+  if (!user.token) {
+    return true;
+  }
+  if (!user.remember) {
+    const decodedToken: JwtPayload = jwtDecode<JwtPayload>(user.token);
+    if (decodedToken.exp == null
+        || moment(new Date()).add(2, 'minutes') > moment.unix(decodedToken.exp)) {
+      return true;
+    }
+  }
+
+  if (!user.refresh) {
+    return false;
+  }
+  const decodedRefreshToken: JwtPayload = jwtDecode<JwtPayload>(user.refresh);
+  return decodedRefreshToken.exp == null
+      || (moment(new Date()).add(1, 'day') > moment.unix(decodedRefreshToken.exp));
 }
 
 export function shouldRefreshToken(token: string | undefined): boolean {
@@ -30,20 +43,19 @@ export const getToken = async (dispatch: AnyDispatch, username: string, pass: st
     .send({ username: username, password: pass })
     .then(res => {
       const data: LoginDto = res.body;
-      dispatch({ ...toBasicAction(ACCOUNT_STORE, AccountActionTypes.LOGIN), payload: toUserAccount(data, remember) });
+      dispatch({ ...toBasicAction(ACCOUNT_STORE, AccountActionTypes.LOGIN), payload: toUserAccount(data, remember, undefined) });
       return null;
     })
     .catch(err => handleFormError(dispatch, err, ACCOUNT_STORE));
 };
 
 export const tryAutoLogin = () => (dispatch: AccountDispatch) => {
-  const storageItem = LocalStorageHelper.getItem(ACCOUNT_TOKEN_STORAGE_KEY);
-  if (storageItem == null) {
+  const user = getTokenFromStorage();
+  if (!user) {
     return;
   }
 
-  const user: UserAccount = JSON.parse(storageItem);
-  if (!user.remember || !user.refresh || shouldForceReLogin(user.refresh)) {
+  if (shouldForceReLogin(user)) {
     dispatch({ ...toBasicAction(ACCOUNT_STORE, AccountActionTypes.FORGET_LOGIN) });
     return;
   }
@@ -62,13 +74,8 @@ export const tryAutoLogin = () => (dispatch: AccountDispatch) => {
 };
 
 export const tryRefresh = () => () => {
-  const storageItem = LocalStorageHelper.getItem(ACCOUNT_TOKEN_STORAGE_KEY);
-  if (storageItem == null) {
-    return;
-  }
-
-  const user: UserAccount = JSON.parse(storageItem);
-  if (!user.remember || !user.token) {
+  const user = getTokenFromStorage();
+  if (!user || !user.token || (!user.remember && moment.unix(user.loginIat).add(3, 'hours') < moment(new Date()))) {
     return;
   }
 

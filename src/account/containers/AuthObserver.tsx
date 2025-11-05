@@ -6,9 +6,6 @@ import { NavigateFunction, useLocation, useNavigate } from 'react-router';
 import { Location } from 'history';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
 import moment from 'moment';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { Beforeunload } from 'react-beforeunload';
 
 import { RootState } from '../../app/Store';
 import * as AccountActions from '../store/actions';
@@ -103,7 +100,7 @@ class AuthObserverClass extends Component<IProps, IAuthObserverState> {
     if ((prevToken == null && currToken != null) || (prevToken != null && currToken != null && this.props.loc.pathname === getRoutePath('/login'))) {
       this.postProcessLogin();
     } else if (prevProps.loc.pathname !== this.props.loc.pathname && prevProps.loc.pathname !== getRoutePath('/login') && this.props.loc.pathname !== getRoutePath('/login') && !isDemoMode()) {
-      const newToken = getToken();
+      const newToken = getToken(false); // get the active auth token that is shared between tabs
       if (currToken != null && newToken == null) {
         this.postProcessLogout();
       } else if (currToken != null && newToken != null) {
@@ -196,6 +193,8 @@ class AuthObserverClass extends Component<IProps, IAuthObserverState> {
 
   postProcessLogout() {
     // console.log('[AuthObserver::postProcessLogout]');
+    this.props.forgetLogin();
+
     if (this.timeoutID != null) {
       clearTimeout(this.timeoutID);
       this.timeoutID = undefined;
@@ -221,7 +220,7 @@ class AuthObserverClass extends Component<IProps, IAuthObserverState> {
       return;
     }
 
-    const newToken = getToken();
+    const newToken = getToken(false); // get the active auth token that is shared between tabs
     if (newToken && newToken.token !== currToken?.token) {
       // console.log('[AuthObserver::postProcessAppActivityChange] token changed outside of this tab, updating the state');
       this.props.sideloadToken(newToken);
@@ -244,17 +243,8 @@ class AuthObserverClass extends Component<IProps, IAuthObserverState> {
     }
   };
 
-  handleForgetLogin() {
-    // console.log('[AuthObserver::handleForgetLogin]');
-    if (this.props.account.item != null && !this.props.account.item.remember) {
-      this.props.forgetLogin();
-    }
-  }
-
   render() {
-    return (
-      <Beforeunload onBeforeunload={() => this.handleForgetLogin()} />
-    );
+    return null;
   }
 }
 

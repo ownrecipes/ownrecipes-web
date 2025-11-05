@@ -6,14 +6,15 @@ import store from './store/store';
 import { serverURLs } from './config';
 import { AccountAction, AccountActionTypes, ACCOUNT_STORE, LoginDto, toUserAccount, ACCOUNT_TOKEN_STORAGE_KEY, UserAccount } from '../account/store/types';
 import { toBasicAction } from './store/redux';
+import { ACTION } from './store/ReduxHelper';
 import LocalStorageHelper from './LocalStorageHelper';
 import { isNetworkError } from './requestUtils';
-import { ACTION } from './store/ReduxHelper';
+import SessionStorageHelper from './SessionStorageHelper';
 
 export const refreshToken = (() => {
   let blocking = false;
 
-  const refresh = async (token: string, remember: boolean) => (
+  const refresh = async (token: string, remember: boolean, loginIat: number | undefined) => (
     superRequest
       .post(serverURLs.refresh_token)
       .set('Accept', 'application/json')
@@ -21,11 +22,11 @@ export const refreshToken = (() => {
       .then(res => {
         blocking = false;
         const data: LoginDto = { ...res.body };
-        const user = toUserAccount(data, remember);
-        LocalStorageHelper.setItem(ACCOUNT_TOKEN_STORAGE_KEY, JSON.stringify(user));
+        const user = toUserAccount(data, remember, loginIat);
+        setToken(user);
         request().set('Authorization', `Bearer ${user.token}`);
 
-        store.dispatch({ ...toBasicAction(ACCOUNT_STORE, AccountActionTypes.LOGIN), payload: toUserAccount(data, remember) } as AccountAction);
+        store.dispatch({ ...toBasicAction(ACCOUNT_STORE, AccountActionTypes.LOGIN), payload: user } as AccountAction);
         return res;
       })
       .catch(error => {
@@ -44,17 +45,12 @@ export const refreshToken = (() => {
       if (!blocking) {
         blocking = true;
 
-        const storageItem = LocalStorageHelper.getItem(ACCOUNT_TOKEN_STORAGE_KEY);
-        if (storageItem == null) {
-          return null;
-        }
-        const user: UserAccount = JSON.parse(storageItem);
-
-        if (!user.refresh) {
+        const user = getToken();
+        if (!user || !user.refresh) {
           return null;
         }
 
-        return refresh(user.refresh, remember);
+        return refresh(user.refresh, remember, user.loginIat);
       } else {
         return null;
       }
@@ -76,17 +72,34 @@ export const initializeSuperagent = (): SuperAgentStatic & SuperAgentRequest => 
   return customRequest;
 };
 
-export const getToken = (): UserAccount | undefined => {
-  const storageItem = LocalStorageHelper.getItem(ACCOUNT_TOKEN_STORAGE_KEY);
+export const getToken = (refresh = true): UserAccount | undefined => {
+  let storageItem: string | undefined;
+  if (refresh) {
+    storageItem = SessionStorageHelper.getItem(ACCOUNT_TOKEN_STORAGE_KEY);
+  }
+  if (!storageItem) {
+    storageItem = LocalStorageHelper.getItem(ACCOUNT_TOKEN_STORAGE_KEY);
+  }
   const user: UserAccount = storageItem ? JSON.parse(storageItem) : undefined;
   return user;
 };
 
+export const setToken = (user: UserAccount) => {
+  if (user.remember || !user.refresh) {
+    LocalStorageHelper.setItem(ACCOUNT_TOKEN_STORAGE_KEY, JSON.stringify(user));
+  } else {
+    SessionStorageHelper.setItem(ACCOUNT_TOKEN_STORAGE_KEY, JSON.stringify(user));
+    const userWithoutRefresh: UserAccount = { ...user };
+    delete userWithoutRefresh.refresh;
+    LocalStorageHelper.setItem(ACCOUNT_TOKEN_STORAGE_KEY, JSON.stringify(userWithoutRefresh));
+  }
+};
+
 export const clearToken = () => {
-  const storageItem = LocalStorageHelper.getItem(ACCOUNT_TOKEN_STORAGE_KEY);
-  const user: UserAccount = storageItem ? JSON.parse(storageItem) : undefined;
+  const user = getToken();
   if (user) {
     LocalStorageHelper.removeItem(ACCOUNT_TOKEN_STORAGE_KEY, user.username);
+    SessionStorageHelper.removeItem(ACCOUNT_TOKEN_STORAGE_KEY, user.username);
   }
 
   request().unset('Authorization');
