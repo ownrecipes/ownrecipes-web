@@ -21,8 +21,14 @@ const IngredientsPanelContainer: React.FC<IIngredientsPanelContainerProps> = ({ 
 
   const recipeSlug = recipe?.slug ?? '';
 
-  const handleUpdateServings = useCallback((servings: number) => {
-    setSearchParams({ ...searchParams, servings: String(servings) });
+  const handleUpdateServings = useCallback((servings: number, updateSearchParams = true) => {
+    if (updateSearchParams) {
+      const serv = searchParams.get('servings');
+      const servNumber = serv ? Number.parseFloat(serv) : undefined;
+      if (servNumber !== servings) {
+        setSearchParams({ ...searchParams, servings: String(servings) });
+      }
+    }
     return dispatch(updateServings(recipeSlug, servings));
   }, [searchParams, recipeSlug]);
 
@@ -34,13 +40,14 @@ const IngredientsPanelContainer: React.FC<IIngredientsPanelContainerProps> = ({ 
     return servNumber;
   }, [searchParams]);
 
-  const customServings = recipe?.customServings;
+  const recipeServings = recipe?.customServings;
+  const requestedServings = locationServings ?? recipe?.servings;
 
   useEffect(() => {
-    if (locationServings && locationServings !== customServings) {
-      handleUpdateServings(locationServings);
+    if (requestedServings && requestedServings !== recipeServings) {
+      handleUpdateServings(requestedServings, requestedServings !== recipe?.servings);
     }
-  }, [handleUpdateServings, locationServings, customServings]);
+  }, [handleUpdateServings, requestedServings, recipeServings]);
 
   return (
     <IngredientsPanel
