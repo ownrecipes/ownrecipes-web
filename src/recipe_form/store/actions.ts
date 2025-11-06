@@ -6,15 +6,14 @@ import { AutocompleteListItem } from '../../common/components/Input/TextareaAuto
 import { handleError, handleFormError } from '../../common/requestUtils';
 import { Recipe, RecipeDto, toRecipe, toRecipeRequest } from '../../recipe/store/RecipeTypes';
 import { COURSES_STORE, CUISINES_STORE, SEASONS_STORE, TAGS_STORE } from '../../recipe_groups/store/types';
-import { getRecipeSuccess } from '../../recipe/store/RecipeActions';
 import { RecipeFormDispatch, RECIPE_FORM_STORE } from './types';
 
-export const load = (recipeSlug: string) => (dispatch: RecipeFormDispatch) => {
+export const load = (recipeSlug: string, customServings: number | undefined) => (dispatch: RecipeFormDispatch) => {
   dispatch({ ...toBasicAction(RECIPE_FORM_STORE, ACTION.GET_START) });
   request()
     .get(`${serverURLs.recipe}${recipeSlug}/`)
     .then(res => {
-      const recipe = toRecipe(res.body);
+      const recipe = { ...toRecipe(res.body), customServings: customServings ?? res.body.servings };
       dispatch({
         ...toBasicAction(
           RECIPE_FORM_STORE,
@@ -22,8 +21,6 @@ export const load = (recipeSlug: string) => (dispatch: RecipeFormDispatch) => {
         ),
         payload: recipe,
       });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      dispatch(getRecipeSuccess(recipe) as any);
     })
     .catch(err => dispatch(handleError(err, RECIPE_FORM_STORE)));
 };
@@ -36,7 +33,7 @@ export const reset = () => (dispatch: RecipeFormDispatch) => {
   dispatch({ ...toBasicAction(RECIPE_FORM_STORE, ACTION.RESET) });
 };
 
-export const save = async (dispatch: AnyDispatch, data: Recipe) => {
+export const save = async (dispatch: AnyDispatch, data: Recipe, customServings: number | undefined) => {
   const photo = (typeof data.photo === 'object') ? data.photo : undefined;
 
   const isNew = !data.id;
@@ -59,7 +56,7 @@ export const save = async (dispatch: AnyDispatch, data: Recipe) => {
           .patch(`${serverURLs.recipe}${res.body.slug}/`)
           .attach('photo', photo)
           .then(resPhoto => {
-            const recipe = toRecipe(resPhoto.body);
+            const recipe = { ...toRecipe(resPhoto.body), customServings: customServings ?? resPhoto.body.servings };
             dispatch({
               ...toBasicAction(
                 RECIPE_FORM_STORE,
@@ -68,12 +65,10 @@ export const save = async (dispatch: AnyDispatch, data: Recipe) => {
               oldId: data.id,
               payload: recipe,
             });
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            dispatch(getRecipeSuccess(recipe) as any);
           })
           .catch(err => handleFormError(dispatch, err, RECIPE_FORM_STORE));
         } else {
-          const recipe = toRecipe(res.body);
+          const recipe = { ...toRecipe(res.body), customServings: customServings ?? res.body.servings };
           dispatch({
             ...toBasicAction(
               RECIPE_FORM_STORE,
@@ -82,10 +77,7 @@ export const save = async (dispatch: AnyDispatch, data: Recipe) => {
             oldId: isNew ? (null as any) : data.id, // eslint-disable-line @typescript-eslint/no-explicit-any
             payload: recipe,
           });
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          dispatch(getRecipeSuccess(recipe) as any);
         }
-      // OPT HACK: Move this to recipe_groups
       dispatch(invalidateCreatableLists(data, toRecipe(res.body)));
       return null;
     })

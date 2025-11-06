@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useLocation, useParams } from 'react-router';
 import { defineMessages, useIntl } from 'react-intl';
 
@@ -25,12 +25,14 @@ const RecipeFormPage: React.FC = () => {
   const location = useLocation();
 
   const fetchRecipeList = RecipeFormActions.fetchRecipeList;
-  const handleSubmit = useCallback(async (data: Recipe) => RecipeFormActions.save(dispatch, data), []);
 
   const recipeSlug = params.recipe ?? '';
   const isNew = recipeSlug === 'create';
 
   const recipe = useSelector((state: RootState) => state.recipeForm.item);
+  const isCustomServings = useMemo(() => recipe?.servings !== recipe?.customServings, []);
+
+  const handleSubmit = useCallback(async (data: Recipe) => RecipeFormActions.save(dispatch, data, isCustomServings ? data.customServings : undefined), [isCustomServings]);
 
   // Load Recipe / or init.
   useEffect(() => {
@@ -38,7 +40,7 @@ const RecipeFormPage: React.FC = () => {
       if (isNew) {
         dispatch(RecipeFormActions.reset());
       } else {
-        dispatch(RecipeFormActions.load(recipeSlug));
+        dispatch(RecipeFormActions.load(recipeSlug, isCustomServings ? recipe?.customServings : undefined));
       }
     }
   }, [recipeSlug, location.key]);
