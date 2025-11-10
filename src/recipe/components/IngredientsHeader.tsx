@@ -68,6 +68,13 @@ const IngredientsHeader: React.FC<IIngredientsHeaderProps> = ({
       && recipe?.subrecipes != null && recipe.subrecipes.length === 0
       && recipe?.ingredientGroups != null && recipe.ingredientGroups.length === 0;
 
+  const updateServingsButton = (
+    <Button type='submit' variant='primary' aria-label={formatMessage(messages.servings_update_button)}>
+      <Icon icon='arrow-repeat' variant='light' />
+      {formatMessage(messages.servings)}
+    </Button>
+  );
+
   return (
     <>
       {(hasNoIngredients || servings === 0) && (
@@ -97,11 +104,8 @@ const IngredientsHeader: React.FC<IIngredientsHeaderProps> = ({
                         aria-label = {formatMessage(messages.servings_input_tooltip)}
                         min   = {0}
                         max   = {1000}
-                        autoComplete = 'off' />
-                    <Button type='submit' variant='primary' aria-label={formatMessage(messages.servings_update_button)}>
-                      <Icon icon='arrow-repeat' variant='light' />
-                      {formatMessage(messages.servings)}
-                    </Button>
+                        autoComplete = 'off'
+                        inputAdornmentEnd = {updateServingsButton} />
                   </Form>
                 )} />
           </div>
