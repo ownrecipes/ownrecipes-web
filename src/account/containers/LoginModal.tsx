@@ -42,7 +42,7 @@ const LoginModal: React.FC = () => {
       <Modal.Body>
         <>
           <div className={classNames('login-form-wrapper', { autologin: accountMeta.pending === PendingState.LOADING })}>
-            <LoginForm username={token?.username} onSubmit={handleLogin} onLogout={handleLogout} />
+            <LoginForm username={token?.username} remember={token?.remember} onSubmit={handleLogin} onLogout={handleLogout} />
           </div>
           {accountMeta.pending === PendingState.LOADING && (
             <PageSpinner />

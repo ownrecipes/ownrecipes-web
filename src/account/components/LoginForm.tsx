@@ -45,24 +45,23 @@ const messages = defineMessages({
   },
 });
 
-export interface ILoginFormProps {
-  username?: string;
+export interface ILoginFormProps extends Partial<LoginModalFormData> {
   onSubmit: (username: string, password: string, remember: boolean) => Promise<ValidationResult>;
   onLogout?: () => void;
 }
 
-interface LoginFormData {
+export interface LoginModalFormData {
   username: string;
   password: string;
   remember: boolean;
 }
 
-const LoginForm: React.FC<ILoginFormProps> = ({ username, onSubmit, onLogout }: ILoginFormProps) => {
+const LoginForm: React.FC<ILoginFormProps> = ({ username, remember, onSubmit, onLogout }: ILoginFormProps) => {
   const { formatMessage } = useIntl();
 
-  const handleSubmit = useCallback(async (form: LoginFormData) => onSubmit(form.username, form.password, form.remember), [onSubmit]);
+  const handleSubmit = useCallback(async (form: LoginModalFormData) => onSubmit(form.username, form.password, form.remember), [onSubmit]);
 
-  const initialValues = useMemo(() => ({ username: username, remember: true }), [username]);
+  const initialValues = useMemo(() => ({ username: username, remember: remember ?? true }), [username, remember]);
 
   return (
     <ReForm

@@ -87,6 +87,7 @@ export const getToken = (refresh = true): UserAccount | undefined => {
 export const setToken = (user: UserAccount) => {
   if (user.remember || !user.refresh) {
     LocalStorageHelper.setItem(ACCOUNT_TOKEN_STORAGE_KEY, JSON.stringify(user));
+    SessionStorageHelper.removeItem(ACCOUNT_TOKEN_STORAGE_KEY, user.username);
   } else {
     SessionStorageHelper.setItem(ACCOUNT_TOKEN_STORAGE_KEY, JSON.stringify(user));
     const userWithoutRefresh: UserAccount = { ...user };
