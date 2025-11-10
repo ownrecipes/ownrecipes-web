@@ -39,9 +39,11 @@ const RandomHeader: React.FC<IRandomHeaderProps> = ({
 
   return (
     <Row xs={1} sm={2} className='random-header-container'>
-      <div>
-        <h1>{formatMessage(messages.random_heading)}</h1>
-        <P>{formatMessage(messages.random_text)}</P>
+      <div className='random-header-col'>
+        <div>
+          <h1>{formatMessage(messages.random_heading)}</h1>
+          <P>{formatMessage(messages.random_text)}</P>
+        </div>
       </div>
       <SearchMenu
           qs       = {qs}

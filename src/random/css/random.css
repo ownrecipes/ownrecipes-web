@@ -1,8 +1,10 @@
 .container.random .random-header-container {
   align-items: flex-end;
 }
-.container.random .random-header-container > div:first-of-type {
-  margin-left: 4px;
+@media screen and (min-width: 576px) {
+  .container.random .random-header-container > div.random-header-col > div {
+    padding-left: 4px;
+  }
 }
 
 .container.random .search-menu {
