@@ -108,7 +108,7 @@ function generatePageList(page: number, pages: number): Array<PaginationPageNumb
   }
 
   // On page 1, page === first -> fill up
-  if (page === 1) {
+  if (page === 1 && pages > 3) {
     previousPage += 1;
     pageList.push({ index: previousPage, role: 'next' });
   }
