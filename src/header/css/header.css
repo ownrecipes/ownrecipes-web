@@ -91,6 +91,15 @@
   box-shadow: 0 0 0 .1rem var(--primaryText) inset;
 }
 
+#header-navbar:not(.authenticated) .navbar-toggler {
+  visibility: hidden;
+}
+@media screen and (max-width: 767px) {
+  #header-navbar:not(.authenticated) .navbar-brand {
+    transform: translate(50%, 0);
+  }
+}
+
 #header-navbar .my-account-nav {
   float: right;
   display: flex;
@@ -107,6 +116,14 @@
   padding-top: 0;
   padding-bottom: 0;
   align-content: center;
+}
+#header-navbar #settings-dropdown {
+  display: flex;
+  align-items: center;
+}
+#header-navbar .header-dropdown > .dropdown-toggle::after,
+#header-navbar #settings-dropdown::after {
+  margin-top: 0.255em;
 }
 @media screen and (max-width: 767px) {
   #header-navbar .my-account-nav > .nav-link {
@@ -209,6 +226,9 @@
   align-content: center;
   padding-top: 0;
   padding-bottom: 0;
+
+  display: flex;
+  align-items: center;
 }
 #header-navbar form .form-group .input-adornment-end .nav-link:hover {
   color: white;

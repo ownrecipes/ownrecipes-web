@@ -101,7 +101,7 @@ const NavBar: React.FC<INavBarProps> = ({
   );
 
   return (
-    <Navbar id='header-navbar' collapseOnSelect className='header' expand='md' fixed='top' ref={navbarRef} aria-label={formatMessage(messages.page_navigation)}>
+    <Navbar id='header-navbar' collapseOnSelect className={classNames('header', { authenticated : isAuthenticated })} expand='md' fixed='top' ref={navbarRef} aria-label={formatMessage(messages.page_navigation)}>
       <Container className={classNames({ 'search-expanded': isSearchExpanded })}>
         <Navbar.Toggle className='print-hidden'><Icon icon='list' variant='light' size='2x' /></Navbar.Toggle>
         <Navbar.Brand>
@@ -111,9 +111,11 @@ const NavBar: React.FC<INavBarProps> = ({
         </Navbar.Brand>
         {!isScreenMdUp && (
           <div className='my-account-nav'>
-            {navSearch}
             {isAuthenticated && (
-              myAccountBtn
+              <>
+                {navSearch}
+                {myAccountBtn}
+              </>
             )}
             {!isAuthenticated && (
               settingsBnt
